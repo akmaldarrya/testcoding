@@ -13,20 +13,32 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
      */
+    // app/Http/Controllers/CustomerController.php
     public function index(Request $request)
     {
-        // Get search query from the request
         $query = $request->input('search');
-
-        // Fetch customers with optional search filter
+        $location = $request->input('location');
+        $category = $request->input('category');
+    
         $customers = Customer::when($query, function($query, $search) {
-            return $query->where('name', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%");
-        })->paginate(10);
-
-        // Return the view with customers
-        return view('customers.index', compact('customers'));
+                return $query->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->when($location, function($query, $location) {
+                return $query->where('location', $location);
+            })
+            ->when($category, function($query, $category) {
+                return $query->where('category', $category);
+            })
+            ->paginate(10);
+    
+        // Get distinct locations and categories for dropdown options
+        $locations = Customer::pluck('location')->unique()->filter()->values();
+        $categories = Customer::pluck('category')->unique()->filter()->values();
+    
+        return view('customers.index', compact('customers', 'locations', 'categories'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -44,22 +56,21 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
-    {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:customers',
-            'phone' => 'required|string|max:20',
-            'address' => 'nullable|string',
-        ]);
+        public function store(Request $request)
+        {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:customers',
+                'phone' => 'required|string|max:20',
+                'address' => 'nullable|string',
+                'location' => 'nullable|string',
+                'category' => 'nullable|string',
+            ]);
 
-        // Create a new customer record
-        Customer::create($validatedData);
+            Customer::create($validatedData);
 
-        // Redirect to the customers index with a success message
-        return redirect()->route('customers.index')->with('success', 'Customer added successfully.');
-    }
+            return redirect()->route('customers.index')->with('success', 'Customer added successfully.');
+        }
 
     /**
      * Display the specified resource.
@@ -90,22 +101,21 @@ class CustomerController extends Controller
      * @param  \App\Models\Customer  $customer
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, Customer $customer)
-    {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:customers,email,' . $customer->id,
-            'phone' => 'required|string|max:20',
-            'address' => 'nullable|string',
-        ]);
+        public function update(Request $request, Customer $customer)
+        {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:customers,email,' . $customer->id,
+                'phone' => 'required|string|max:20',
+                'address' => 'nullable|string',
+                'location' => 'nullable|string',
+                'category' => 'nullable|string',
+            ]);
 
-        // Update the customer record
-        $customer->update($validatedData);
+            $customer->update($validatedData);
 
-        // Redirect to the customers index with a success message
-        return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
-    }
+            return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
+        }
 
     /**
      * Remove the specified resource from storage.

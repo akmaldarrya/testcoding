@@ -1,3 +1,4 @@
+<!-- resources/views/customers/index.blade.php -->
 @extends('layout.dashboard')
 
 @section('content')
@@ -8,10 +9,32 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <form action="{{ route('customers.index') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search by name or email" value="{{ request()->input('search') }}">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="submit">Search</button>
+                <div class="form-row">
+                    <div class="col">
+                        <input type="text" class="form-control" name="search" placeholder="Search by name or email" value="{{ request()->input('search') }}">
+                    </div>
+                    <div class="col">
+                        <select name="location" class="form-control">
+                            <option value="">All Locations</option>
+                            @foreach($locations as $loc)
+                                <option value="{{ $loc }}" {{ request()->input('location') == $loc ? 'selected' : '' }}>
+                                    {{ $loc }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select name="category" class="form-control">
+                            <option value="">All Categories</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat }}" {{ request()->input('category') == $cat ? 'selected' : '' }}>
+                                    {{ $cat }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-primary mt-4" type="submit">Filter</button>
                     </div>
                 </div>
             </form>
@@ -27,6 +50,8 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Address</th>
+                            <th>Location</th>
+                            <th>Category</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -38,6 +63,8 @@
                             <td>{{ $customer->email }}</td>
                             <td>{{ $customer->phone }}</td>
                             <td>{{ $customer->address }}</td>
+                            <td>{{ $customer->location }}</td>
+                            <td>{{ $customer->category }}</td>
                             <td>
                                 <a href="{{ route('customers.show', $customer->id) }}" class="btn btn-info btn-sm">View</a>
                                 <a href="{{ route('customers.edit', $customer->id) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -50,7 +77,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">No customers found.</td>
+                            <td colspan="8" class="text-center">No customers found.</td>
                         </tr>
                         @endforelse
                     </tbody>

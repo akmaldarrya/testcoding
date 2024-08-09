@@ -27,6 +27,14 @@
                     <label for="address">Address</label>
                     <textarea class="form-control" id="address" name="address"></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" value="{{ old('location', $customer->location ?? '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" class="form-control" id="category" name="category" value="{{ old('category', $customer->category ?? '') }}">
+                </div>
                 <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>
